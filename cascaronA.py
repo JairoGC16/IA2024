@@ -1,5 +1,6 @@
 import pygame
 from queue import PriorityQueue
+import math
 
 # Configuraciones iniciales
 ANCHO_VENTANA = 800
@@ -136,18 +137,23 @@ def obtener_click_pos(pos, filas, ancho):
     return fila, col
 
 
-def h(p1, p2):
-    x1, y1 = p1
-    x2, y2 = p2
-    return abs(x1 - x2) + abs(y1 - y2)
-
-
 def new_way(padre, nodo_actual, dibujar):
     while nodo_actual in padre:
         nodo_actual = padre[nodo_actual]
         nodo_actual.hacer_camino()
         dibujar()
 
+def h(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+def calcular_costo(padre, nodo_actual):
+    x1, y1 = padre.get_pos()
+    x2, y2 = nodo_actual.get_pos()
+    if abs(x1 - x2) == 1 and abs(y1 - y2) == 1:  # Movimiento diagonal
+        return math.sqrt(2)
+    return 1  # Movimiento horizontal o vertical
 
 def a_asterisco(dibujar, grid, inicio, fin):
     contador = 0
@@ -178,7 +184,7 @@ def a_asterisco(dibujar, grid, inicio, fin):
             return True
 
         for vecino in nodo_actual.vecinos:
-            temp_g_score = g_score[nodo_actual] + 1
+            temp_g_score = g_score[nodo_actual] + calcular_costo(nodo_actual, vecino)
 
             if temp_g_score < g_score[vecino]:
                 padre[vecino] = nodo_actual
