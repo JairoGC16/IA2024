@@ -160,10 +160,10 @@ def a_asterisco(dibujar, grid, inicio, fin):
     open_set = PriorityQueue()
     open_set.put((0, contador, inicio))
     padre = {}
-    g_score = {nodo: float("inf") for fila in grid for nodo in fila}
-    g_score[inicio] = 0
-    f_score = {nodo: float("inf") for fila in grid for nodo in fila}
-    f_score[inicio] = h(inicio.get_pos(), fin.get_pos())
+    g_acomu = {nodo: float("inf") for fila in grid for nodo in fila}
+    g_acomu[inicio] = 0
+    f_acom = {nodo: float("inf") for fila in grid for nodo in fila}
+    f_acom[inicio] = h(inicio.get_pos(), fin.get_pos())
 
     open_set_hash = {inicio}
     closed_list = []
@@ -184,15 +184,15 @@ def a_asterisco(dibujar, grid, inicio, fin):
             return True
 
         for vecino in nodo_actual.vecinos:
-            temp_g_score = g_score[nodo_actual] + calcular_costo(nodo_actual, vecino)
+            temp_g_acomu = g_acomu[nodo_actual] + calcular_costo(nodo_actual, vecino)
 
-            if temp_g_score < g_score[vecino]:
+            if temp_g_acomu < g_acomu[vecino]:
                 padre[vecino] = nodo_actual
-                g_score[vecino] = temp_g_score
-                f_score[vecino] = temp_g_score + h(vecino.get_pos(), fin.get_pos())
+                g_acomu[vecino] = temp_g_acomu
+                f_acom[vecino] = temp_g_acomu + h(vecino.get_pos(), fin.get_pos())
                 if vecino not in open_set_hash:
                     contador += 1
-                    open_set.put((f_score[vecino], contador, vecino))
+                    open_set.put((f_acom[vecino], contador, vecino))
                     open_set_hash.add(vecino)
                     vecino.hacer_abierto()
 
