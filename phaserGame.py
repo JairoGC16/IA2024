@@ -260,7 +260,7 @@ def arbol():
         update()
 
         pygame.display.flip()
-        pygame.time.Clock().tick(30)
+        pygame.time.Clock().tick(60)
         
 def crear_red():
     model = Sequential([
