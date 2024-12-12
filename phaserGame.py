@@ -206,11 +206,11 @@ def entrenarArbol():
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    clf = DecisionTreeClassifier()
+    arbolEntr = DecisionTreeClassifier()
     
-    clf.fit(X_train, y_train)
+    arbolEntr.fit(X_train, y_train)
     
-    return clf
+    return arbolEntr
 
 def predecir_accionArbol(model, velocidad_bala, distancia):
     datos_entrada = np.array([[velocidad_bala, distancia]])
@@ -221,7 +221,7 @@ def predecir_accionArbol(model, velocidad_bala, distancia):
 def arbol():
     global modo_auto, jugador, bala, salto, en_suelo, menu_activo
 
-    clf = entrenarArbol()
+    arbolEntr = entrenarArbol()
 
     while modo_auto:
         for evento in pygame.event.get():
@@ -238,7 +238,7 @@ def arbol():
         distancia = abs(jugador.x - bala.x)
         velocidad_bala_abs = abs(velocidad_bala)
 
-        accion = predecir_accionArbol(clf, velocidad_bala_abs, distancia)
+        accion = predecir_accionArbol(arbolEntr, velocidad_bala_abs, distancia)
 
         if accion == 1:
             if en_suelo:
