@@ -168,6 +168,12 @@ def pausa_juego():
     else:
         print("Juego reanudado.")
 
+def realizar_salto():
+    global salto, en_suelo
+    if en_suelo:
+        salto = True
+        en_suelo = False
+
 # Función para mostrar el menú y seleccionar el modo de juego
 def mostrar_menu():
     global menu_activo, modo_auto
@@ -199,29 +205,27 @@ def mostrar_menu():
                     pygame.quit()
                     exit()
                     
-def entrenarArbol():
-    
+def preparar_datos(datos_modelo):
     X = [item[:2] for item in datos_modelo]  
     y = [item[2] for item in datos_modelo]
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    arbolEntr = DecisionTreeClassifier()
-    
-    arbolEntr.fit(X_train, y_train)
-    
-    return arbolEntr
+    return X, y
+
+def entrenarArbol(X, y):      
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)    
+    arbolEntrenado = DecisionTreeClassifier(random_state=42, max_depth=1)    
+    arbolEntrenado.fit(X_train, y_train)    
+    return arbolEntrenado
 
 def predecir_accionArbol(model, velocidad_bala, distancia):
     datos_entrada = np.array([[velocidad_bala, distancia]])
-    prediccion = model.predict(datos_entrada)
-    return prediccion
-
+    return model.predict(datos_entrada)
 
 def arbol():
     global modo_auto, jugador, bala, salto, en_suelo, menu_activo
+    
+    X, y = preparar_datos(datos_modelo)
 
-    arbolEntr = entrenarArbol()
+    arbolEntrenado = entrenarArbol(X, y)
 
     while modo_auto:
         for evento in pygame.event.get():
@@ -238,21 +242,13 @@ def arbol():
         distancia = abs(jugador.x - bala.x)
         velocidad_bala_abs = abs(velocidad_bala)
 
-        accion = predecir_accionArbol(arbolEntr, velocidad_bala_abs, distancia)
+        accion = predecir_accionArbol(arbolEntrenado, velocidad_bala_abs, distancia)
 
         if accion == 1:
-            if en_suelo:
-                salto = True
-                en_suelo = False
+            realizar_salto()
 
         if salto:
             manejar_salto()
-
-        if jugador.y >= h - 100:
-            jugador.y = h - 100
-            if not en_suelo:
-                en_suelo = True
-                salto = False
 
         if not bala_disparada:
             disparar_bala()
@@ -278,8 +274,7 @@ def entrenar_red():
     
     scaler = MinMaxScaler()
     
-    X = [item[:2] for item in datos_modelo]  
-    y = [item[2] for item in datos_modelo]
+    X, y = preparar_datos(datos_modelo)
     
     X = np.array(X)
     y = np.array(y)
@@ -315,23 +310,15 @@ def red():
         distancia = abs(jugador.x - bala.x)
         velocidad_bala_abs = abs(velocidad_bala)
         
-        if distancia_anterior is None or abs(distancia - distancia_anterior) > 5:
-            accion = predecir_accion(model, scaler, velocidad_bala_abs, distancia)
+        if distancia_anterior is None or abs(distancia - distancia_anterior) > 7:
+            accion = predecir_accionRed(model, scaler, velocidad_bala_abs, distancia)
             distancia_anterior = distancia
 
         if accion == 1:
-            if en_suelo:
-                salto = True
-                en_suelo = False
+            realizar_salto()
 
         if salto:
             manejar_salto()
-
-        if jugador.y >= 400 - 100:
-            jugador.y = 400 - 100
-            if not en_suelo:
-                en_suelo = True
-                salto = False
 
         if not bala_disparada:
             disparar_bala()
@@ -340,7 +327,7 @@ def red():
         pygame.display.flip()
         pygame.time.Clock().tick(60)
         
-def predecir_accion(model, scaler, velocidad_bala, distancia):
+def predecir_accionRed(model, scaler, velocidad_bala, distancia):
     entrada = scaler.transform([[velocidad_bala, distancia]])
     prediccion = model.predict(entrada)
     umbral = 0.5
