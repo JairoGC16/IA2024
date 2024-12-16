@@ -274,7 +274,9 @@ def entrenar_red():
     
     scaler = MinMaxScaler()
     
-    X, y = preparar_datos(datos_modelo)
+    # X, y = preparar_datos(datos_modelo)
+    X = [item[:2] for item in datos_modelo]  
+    y = [item[2] for item in datos_modelo]
     
     X = np.array(X)
     y = np.array(y)
